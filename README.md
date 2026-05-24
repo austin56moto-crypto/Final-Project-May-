@@ -16,6 +16,7 @@ The project is structured as a full-stack cloud assignment with:
 ## What The App Does
 
 - Shows a role selection screen at startup
+- Shows a sign-in screen at startup
 - Opens only the selected workspace after login
 - Lets admins create student tasks from the UI
 - Lets students attach a file and submit work as complete
@@ -30,6 +31,14 @@ This repo currently includes a working local prototype of the student/admin work
 - Student submissions support file picking and attachment metadata
 - Role-specific dashboards are gated at the app entry point
 - The AWS backend and Terraform structure are scaffolded for the next phase
+
+### Demo Logins
+
+The current front-end prototype includes sample portal credentials:
+
+- `admin@interntask.edu` / `Admin123!`
+- `instructor@interntask.edu` / `Instructor123!`
+- `student@interntask.edu` / `Student123!`
 
 ## Repository Layout
 
@@ -55,7 +64,7 @@ The Flutter app lives in `mobile-flutter/` and includes:
 ### Key Flow
 
 1. Open the app.
-2. Select `Admin`, `Instructor`, or `Student`.
+2. Sign in with the role you want to access.
 3. Admin creates tasks.
 4. Students see assigned tasks in their workspace.
 5. Students attach a file and submit the task as complete.
@@ -124,4 +133,3 @@ The current Flutter app has been checked with:
 - Add authorization checks in Lambda
 - Send task and submission notifications through SNS
 - Integrate Amazon Bedrock for AI task generation
-

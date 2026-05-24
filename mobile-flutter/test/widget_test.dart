@@ -10,13 +10,18 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:interntask_ai_cloud/main.dart';
 
 void main() {
-  testWidgets('renders role selection screen', (WidgetTester tester) async {
+  testWidgets('signs in and opens the portal', (WidgetTester tester) async {
     await tester.pumpWidget(const InternTaskApp());
     await tester.pumpAndSettle();
 
-    expect(find.text('Choose your access'), findsOneWidget);
-    expect(find.text('Admin'), findsWidgets);
-    expect(find.text('Instructor'), findsWidgets);
-    expect(find.text('Student'), findsWidgets);
+    expect(find.text('Sign in to your portal'), findsOneWidget);
+    expect(find.text('Enter portal'), findsOneWidget);
+
+    await tester.ensureVisible(find.text('Enter portal'));
+    await tester.tap(find.text('Enter portal'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Live Tasks'), findsOneWidget);
+    expect(find.text('Sign out'), findsOneWidget);
   });
 }

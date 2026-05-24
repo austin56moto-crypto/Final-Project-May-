@@ -1,5 +1,10 @@
+// ignore_for_file: unused_element
+
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+
+import 'auth/auth_screen.dart';
+import 'services/auth_service.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -214,26 +219,56 @@ class RoleGate extends StatefulWidget {
 }
 
 class _RoleGateState extends State<RoleGate> {
+  final AuthService _authService = const AuthService();
   final TaskStore _store = TaskStore();
-  UserRole? _role;
+  AuthSession? _session;
 
-  void _selectRole(UserRole role) {
-    setState(() => _role = role);
+  Future<AuthSession> _handleSignIn({
+    required String email,
+    required String password,
+    required String role,
+  }) async {
+    final session = await _authService.signIn(
+      email: email,
+      password: password,
+      role: role,
+    );
+    if (!mounted) {
+      return session;
+    }
+    setState(() => _session = session);
+    return session;
+  }
+
+  void _handleSignOut() {
+    setState(() => _session = null);
+  }
+
+  UserRole _roleFromSession(AuthSession session) {
+    switch (session.role) {
+      case 'Admin':
+        return UserRole.admin;
+      case 'Instructor':
+        return UserRole.instructor;
+      default:
+        return UserRole.student;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final role = _role;
-    if (role == null) {
-      return _RoleSelector(
-        onSelect: _selectRole,
+    final session = _session;
+    if (session == null) {
+      return AuthScreen(
+        onSignIn: _handleSignIn,
       );
     }
 
     return Shell(
       store: _store,
-      role: role,
-      onSwitchRole: () => setState(() => _role = null),
+      role: _roleFromSession(session),
+      session: session,
+      onSignOut: _handleSignOut,
     );
   }
 }
@@ -241,13 +276,15 @@ class _RoleGateState extends State<RoleGate> {
 class Shell extends StatefulWidget {
   final TaskStore store;
   final UserRole role;
-  final VoidCallback onSwitchRole;
+  final AuthSession session;
+  final VoidCallback onSignOut;
 
   const Shell({
     super.key,
     required this.store,
     required this.role,
-    required this.onSwitchRole,
+    required this.session,
+    required this.onSignOut,
   });
 
   @override
@@ -443,7 +480,8 @@ class _ShellState extends State<Shell> {
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
             child: _RoleSwitchBar(
               currentRole: widget.role,
-              onSwitchRole: widget.onSwitchRole,
+              session: widget.session,
+              onSignOut: widget.onSignOut,
             ),
           ),
         );
@@ -681,41 +719,71 @@ class _RoleChoiceCard extends StatelessWidget {
 
 class _RoleSwitchBar extends StatelessWidget {
   final UserRole currentRole;
-  final VoidCallback onSwitchRole;
+  final AuthSession session;
+  final VoidCallback onSignOut;
 
   const _RoleSwitchBar({
     required this.currentRole,
-    required this.onSwitchRole,
+    required this.session,
+    required this.onSignOut,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF0A1426),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withAlpha(14)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                'Signed in as ${currentRole.label}',
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-              ),
-            ),
-            TextButton.icon(
-              onPressed: onSwitchRole,
-              icon: const Icon(Icons.swap_horiz_rounded),
-              label: const Text('Switch role'),
-            ),
-          ],
-        ),
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 420;
+
+        return Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFF0A1426),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.white.withAlpha(14)),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            child: compact
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${session.displayName} · ${currentRole.label}',
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                      ),
+                      const SizedBox(height: 8),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton.icon(
+                          onPressed: onSignOut,
+                          icon: const Icon(Icons.logout_rounded),
+                          label: const Text('Sign out'),
+                        ),
+                      ),
+                    ],
+                  )
+                : Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          '${session.displayName} · ${currentRole.label}',
+                          style:
+                              Theme.of(context).textTheme.labelLarge?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                        ),
+                      ),
+                      TextButton.icon(
+                        onPressed: onSignOut,
+                        icon: const Icon(Icons.logout_rounded),
+                        label: const Text('Sign out'),
+                      ),
+                    ],
+                  ),
+          ),
+        );
+      },
     );
   }
 }
@@ -1415,10 +1483,11 @@ class _StatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Container(
               width: 10,
@@ -1435,11 +1504,12 @@ class _StatCard extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             Text(
               stat.value,
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.w900,
+                    fontSize: 24,
                   ),
             ),
             const SizedBox(height: 4),
@@ -1516,62 +1586,96 @@ class _PortalTaskRow extends StatelessWidget {
     return Card(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        child: Row(
-          children: [
-            Container(
-              width: 14,
-              height: 14,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: task.completed ? accent.withAlpha(140) : accent,
-              ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final compact = constraints.maxWidth < 560;
+            final actionButton = role == UserRole.student && canSubmitTask
+                ? FilledButton.tonalIcon(
+                    onPressed: onSubmit,
+                    icon: Icon(task.completed
+                        ? Icons.refresh_rounded
+                        : Icons.upload_file_rounded),
+                    label: Text(task.completed ? 'Resubmit' : 'Attach file'),
+                  )
+                : TextButton(
+                    onPressed: onToggle,
+                    child: Text(task.completed ? 'Reopen' : 'Complete'),
+                  );
+
+            final details = Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  task.title,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${task.dueLabel} • ${task.statusLabel}',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.white.withAlpha(160),
+                      ),
+                ),
+                if (task.attachmentName != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    'Attachment: ${task.attachmentName}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.white.withAlpha(140),
+                        ),
+                  ),
+                ],
+              ],
+            );
+
+            if (compact) {
+              return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    task.title,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
+                  Row(
+                    children: [
+                      Container(
+                        width: 14,
+                        height: 14,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color:
+                              task.completed ? accent.withAlpha(140) : accent,
                         ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(child: details),
+                    ],
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '${task.dueLabel} • ${task.statusLabel}',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.white.withAlpha(160),
-                        ),
+                  const SizedBox(height: 12),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: actionButton,
                   ),
-                  if (task.attachmentName != null) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      'Attachment: ${task.attachmentName}',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.white.withAlpha(140),
-                          ),
-                    ),
-                  ],
                 ],
-              ),
-            ),
-            if (role == UserRole.student && canSubmitTask)
-              FilledButton.tonalIcon(
-                onPressed: onSubmit,
-                icon: Icon(task.completed
-                    ? Icons.refresh_rounded
-                    : Icons.upload_file_rounded),
-                label: Text(task.completed ? 'Resubmit' : 'Attach file'),
-              )
-            else
-              TextButton(
-                onPressed: onToggle,
-                child: Text(task.completed ? 'Reopen' : 'Complete'),
-              ),
-          ],
+              );
+            }
+
+            return Row(
+              children: [
+                Container(
+                  width: 14,
+                  height: 14,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: task.completed ? accent.withAlpha(140) : accent,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(child: details),
+                actionButton,
+              ],
+            );
+          },
         ),
       ),
     );
