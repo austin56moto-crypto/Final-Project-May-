@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../services/auth_service.dart';
+import '../theme/portal_theme.dart';
 
 class AuthScreen extends StatefulWidget {
   final Future<AuthSession> Function({
@@ -64,7 +65,7 @@ class _AuthScreenState extends State<AuthScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          const _AuthBackground(),
+          const PortalBackground(),
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
@@ -143,14 +144,14 @@ class _IntroPanel extends StatelessWidget {
         borderRadius: BorderRadius.circular(30),
         gradient: const LinearGradient(
           colors: [
-            Color(0xFF101B33),
-            Color(0xFF0D1729),
-            Color(0xFF0B1220),
+            PortalTokens.backgroundElevated,
+            PortalTokens.backgroundBase,
+            PortalTokens.backgroundDeep,
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        border: Border.all(color: Colors.white.withAlpha(16)),
+        border: Border.all(color: PortalTokens.borderDefault),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -158,7 +159,7 @@ class _IntroPanel extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             decoration: BoxDecoration(
-              color: const Color(0xFF14B8A6).withAlpha(36),
+              color: PortalTokens.accent.withAlpha(28),
               borderRadius: BorderRadius.circular(999),
             ),
             child: Text(
@@ -207,9 +208,9 @@ class _DemoCredentials extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: const Color(0xFF0E1A2E),
+        color: PortalTokens.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withAlpha(14)),
+        border: Border.all(color: PortalTokens.borderDefault),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -296,7 +297,7 @@ class _SignInCard extends StatelessWidget {
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(30),
-        color: const Color(0xFF0A1426),
+        color: PortalTokens.backgroundElevated,
         border: Border.all(color: Colors.white.withAlpha(16)),
       ),
       child: Form(
@@ -405,74 +406,6 @@ class _SignInCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _AuthBackground extends StatelessWidget {
-  const _AuthBackground();
-
-  @override
-  Widget build(BuildContext context) {
-    return IgnorePointer(
-      child: Stack(
-        children: [
-          Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Color(0xFF050B15),
-                  Color(0xFF081223),
-                  Color(0xFF0B1021),
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
-          ),
-          const Positioned(
-            top: -30,
-            right: -30,
-            child: _AuthOrb(color: Color(0x1C14B8A6), size: 220),
-          ),
-          const Positioned(
-            top: 120,
-            left: -60,
-            child: _AuthOrb(color: Color(0x14F59E0B), size: 180),
-          ),
-          const Positioned(
-            bottom: -40,
-            right: 30,
-            child: _AuthOrb(color: Color(0x1460A5FA), size: 200),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _AuthOrb extends StatelessWidget {
-  final Color color;
-  final double size;
-
-  const _AuthOrb({required this.color, required this.size});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: color,
-        boxShadow: [
-          BoxShadow(
-            color: color,
-            blurRadius: 60,
-            spreadRadius: 10,
-          ),
-        ],
       ),
     );
   }

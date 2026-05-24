@@ -12,14 +12,15 @@ import 'package:interntask_ai_cloud/main.dart';
 void main() {
   testWidgets('signs in and opens the portal', (WidgetTester tester) async {
     await tester.pumpWidget(const InternTaskApp());
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     expect(find.text('Sign in to your portal'), findsOneWidget);
     expect(find.text('Enter portal'), findsOneWidget);
 
     await tester.ensureVisible(find.text('Enter portal'));
     await tester.tap(find.text('Enter portal'));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 600));
+    await tester.pump(const Duration(milliseconds: 100));
 
     expect(find.text('Live Tasks'), findsOneWidget);
     expect(find.text('Sign out'), findsOneWidget);

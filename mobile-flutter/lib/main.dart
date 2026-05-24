@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 
 import 'auth/auth_screen.dart';
 import 'services/auth_service.dart';
+import 'theme/portal_theme.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,50 +19,10 @@ class InternTaskApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = ColorScheme.fromSeed(
-      seedColor: const Color(0xFF14B8A6),
-      brightness: Brightness.dark,
-    ).copyWith(
-      primary: const Color(0xFF5EEAD4),
-      secondary: const Color(0xFFF59E0B),
-      tertiary: const Color(0xFF60A5FA),
-      surface: const Color(0xFF0B1220),
-      onSurface: Colors.white,
-    );
-
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'InternTask AI Cloud',
-      theme: ThemeData(
-        colorScheme: scheme,
-        scaffoldBackgroundColor: const Color(0xFF07111F),
-        useMaterial3: true,
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.transparent,
-          foregroundColor: Colors.white,
-          elevation: 0,
-        ),
-        navigationBarTheme: NavigationBarThemeData(
-          backgroundColor: const Color(0xFF0A1426),
-          indicatorColor: const Color(0xFF14B8A6).withAlpha(36),
-          labelTextStyle: const WidgetStatePropertyAll(
-            TextStyle(fontWeight: FontWeight.w700),
-          ),
-        ),
-        cardTheme: CardThemeData(
-          color: const Color(0xFF0E1A2E),
-          surfaceTintColor: Colors.transparent,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(22),
-            side: BorderSide(color: Colors.white.withAlpha(18)),
-          ),
-        ),
-        textTheme: Typography.whiteMountainView.apply(
-          bodyColor: Colors.white,
-          displayColor: Colors.white,
-        ),
-      ),
+      theme: buildPortalTheme(),
       home: const RoleGate(),
     );
   }
@@ -298,7 +259,7 @@ class _ShellState extends State<Shell> {
       title: 'Admin',
       subtitle:
           'Manage users, monitor system health, and keep everything aligned.',
-      accent: Color(0xFFF59E0B),
+      accent: PortalTokens.accent,
       stats: [
         _Stat(label: 'Users', value: '128'),
         _Stat(label: 'Tasks', value: '42'),
@@ -343,7 +304,7 @@ class _ShellState extends State<Shell> {
       title: 'Instructor',
       subtitle:
           'Create tasks, generate AI drafts, and review submissions quickly.',
-      accent: Color(0xFF14B8A6),
+      accent: PortalTokens.accentBright,
       stats: [
         _Stat(label: 'Open tasks', value: '18'),
         _Stat(label: 'Submissions', value: '11'),
@@ -388,7 +349,7 @@ class _ShellState extends State<Shell> {
       title: 'Student',
       subtitle:
           'See assigned work, upload proof, and track progress from one place.',
-      accent: Color(0xFF60A5FA),
+      accent: Color(0xFF7C83FF),
       stats: [
         _Stat(label: 'Assigned', value: '6'),
         _Stat(label: 'Done', value: '4'),
@@ -455,7 +416,7 @@ class _ShellState extends State<Shell> {
           ),
           body: Stack(
             children: [
-              const _Background(),
+              const PortalBackground(),
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 220),
                 switchInCurve: Curves.easeOutCubic,
@@ -493,7 +454,7 @@ class _ShellState extends State<Shell> {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFF0B1220),
+      backgroundColor: PortalTokens.backgroundBase,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
@@ -520,7 +481,7 @@ class _ShellState extends State<Shell> {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFF0B1220),
+      backgroundColor: PortalTokens.backgroundBase,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
@@ -545,7 +506,7 @@ class _RoleSelector extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          const _Background(),
+          const PortalBackground(),
           SafeArea(
             child: Center(
               child: ConstrainedBox(
@@ -736,9 +697,9 @@ class _RoleSwitchBar extends StatelessWidget {
 
         return Container(
           decoration: BoxDecoration(
-            color: const Color(0xFF0A1426),
+            color: PortalTokens.backgroundElevated,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.white.withAlpha(14)),
+            border: Border.all(color: PortalTokens.borderDefault),
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
@@ -925,7 +886,7 @@ class _ModeDashboard extends StatelessWidget {
                     padding: const EdgeInsets.all(18),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(24),
-                      color: const Color(0xFF0E1A2E),
+                      color: PortalTokens.backgroundElevated,
                       border: Border.all(color: Colors.white.withAlpha(14)),
                     ),
                     child: Text(
@@ -1156,7 +1117,7 @@ class _SidePanel extends StatelessWidget {
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
-        color: const Color(0xFF0E1A2E),
+        color: PortalTokens.backgroundElevated,
         border: Border.all(color: Colors.white.withAlpha(14)),
       ),
       child: Column(
@@ -1242,7 +1203,7 @@ class _ProgressCard extends StatelessWidget {
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
-        color: const Color(0xFF0E1A2E),
+        color: PortalTokens.backgroundElevated,
         border: Border.all(color: Colors.white.withAlpha(14)),
       ),
       child: Column(
@@ -1328,7 +1289,7 @@ class _ActivityCard extends StatelessWidget {
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
-        color: const Color(0xFF0E1A2E),
+        color: PortalTokens.backgroundElevated,
         border: Border.all(color: Colors.white.withAlpha(14)),
       ),
       child: Column(
@@ -1903,7 +1864,7 @@ class _SubmissionComposerState extends State<_SubmissionComposer> {
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(22),
-                  color: const Color(0xFF0E1A2E),
+                  color: PortalTokens.backgroundElevated,
                   border: Border.all(color: Colors.white.withAlpha(14)),
                 ),
                 child: Row(
@@ -1912,14 +1873,14 @@ class _SubmissionComposerState extends State<_SubmissionComposer> {
                       width: 44,
                       height: 44,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF14B8A6).withAlpha(28),
+                        color: PortalTokens.accent.withAlpha(24),
                         borderRadius: BorderRadius.circular(14),
                       ),
                       child: Icon(
                         file == null
                             ? Icons.upload_file_rounded
                             : Icons.description_rounded,
-                        color: const Color(0xFF5EEAD4),
+                        color: PortalTokens.foreground,
                       ),
                     ),
                     const SizedBox(width: 14),
@@ -2067,7 +2028,7 @@ class _HealthChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Chip(
       side: BorderSide(color: Colors.white.withAlpha(14)),
-      backgroundColor: const Color(0xFF0E1A2E),
+      backgroundColor: PortalTokens.backgroundElevated,
       label: Text(
         'System healthy',
         style: Theme.of(context).textTheme.labelMedium?.copyWith(
